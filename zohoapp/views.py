@@ -735,4 +735,9 @@ def retainer_delete(request,pk):
     return redirect('retainer_invoice')
         
             
-    
+#------------------------------------------
+def view_sales_order(requewst):
+    return render(requewst,'view_sales_order.html')   
+
+def create_sales_order(request):
+    return render(request,'create_sales_order.html')

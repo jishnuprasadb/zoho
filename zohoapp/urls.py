@@ -49,6 +49,8 @@ urlpatterns = [
     path('send_mail/<int:pk>',views.mail_send,name='mail_send'),
     path('retaineritem_delete/<int:pk>',views.retaineritem_delete,name='retaineritem_delete'),
     path('retainer_delete/<int:pk>',views.retainer_delete,name='retainer_delete'),
+    path('view_sales_order',views.view_sales_order,name='view_sales_order'),
+    path('create_sales_order',views.create_sales_order,name='create_sales_order'),
     
     
     re_path(r'^static/(?P<path>.*)$', serve,{'document_root': settings.STATIC_ROOT}),
