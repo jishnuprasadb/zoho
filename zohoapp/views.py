@@ -10,6 +10,7 @@ from django.db.models import Q
 from django.conf import settings
 from django.core.mail import send_mail
 from django.core.mail import EmailMessage
+from django.http import JsonResponse
 
 def index(request):
 
@@ -538,7 +539,7 @@ def add_customer(request):
     if request.method=='POST':
         customer_name=request.POST['name']
         address=request.POST['address']
-        customer=Customer(customer_name=customer_name,customer_address=address)
+        customer=customer(customer_name=customer_name,customer_address=address)
         customer.save()
         return redirect('add_invoice')
     return render(request,'add_customer.html')
@@ -554,7 +555,7 @@ def retainer_invoice(request):
 
 @login_required(login_url='login')
 def add_invoice(request):
-    customer=Customer.objects.all()   
+    customer=customer.objects.all()   
     context={'customer':customer,}    
     return render(request,'add_invoice.html',context)
 
@@ -563,7 +564,7 @@ def create_invoice_draft(request):
     
     if request.method=='POST':
         select=request.POST['select']
-        customer_name=Customer.objects.get(id=select)
+        customer_name=customer.objects.get(id=select)
         retainer_invoice_number=request.POST['retainer-invoice-number']
         references=request.POST['references']
         retainer_invoice_date=request.POST['invoicedate']
@@ -597,7 +598,7 @@ def create_invoice_draft(request):
 def create_invoice_send(request):
     if request.method=='POST':
         select=request.POST['select']
-        customer_name=Customer.objects.get(id=select)
+        customer_name=customer.objects.get(id=select)
         retainer_invoice_number=request.POST['retainer-invoice-number']
         references=request.POST['references']
         retainer_invoice_date=request.POST['invoicedate']
@@ -638,7 +639,7 @@ def retainer_template(request,pk):
 @login_required(login_url='login')
 def retainer_edit_page(request,pk):
     invoice=RetainerInvoice.objects.get(id=pk)
-    customer=Customer.objects.all()
+    customer=customer.objects.all()
     items=Retaineritems.objects.filter(retainer=pk)
     context={'invoice':invoice, 'customer':customer,'items':items}
     return render(request,'retainer_invoice_edit.html', context)
@@ -650,7 +651,7 @@ def retainer_update(request,pk):
     if request.method=='POST':
         retainer_invoice=RetainerInvoice.objects.get(id=pk)
         select=request.POST['select']
-        retainer_invoice.customer_name=Customer.objects.get(id=select)
+        retainer_invoice.customer_name=customer.objects.get(id=select)
         retainer_invoice.retainer_invoice_number=request.POST['retainer-invoice-number']
         retainer_invoice.refrences=request.POST['references']
         retainer_invoice.retainer_invoice_date=request.POST['invoicedate']
@@ -736,8 +737,294 @@ def retainer_delete(request,pk):
         
             
 #------------------------------------------
-def view_sales_order(requewst):
-    return render(requewst,'view_sales_order.html')   
 
+    
+@login_required(login_url='login')
+def view_sales_order(request):
+    sales=SalesOrder.objects.all()
+    return render(request,'view_sales_order.html',{"sale":sales})   
+
+    
+@login_required(login_url='login')
 def create_sales_order(request):
-    return render(request,'create_sales_order.html')
+    cust=customer.objects.all()
+    pay=payment_terms.objects.all()
+    itm=AddItem.objects.all()
+    context={
+        "c":cust,
+        "pay":pay,
+        "itm":itm,
+    }
+    return render(request,'create_sales_order.html',context)
+
+    
+@login_required(login_url='login')
+def add_customer_for_sorder(request):
+    if request.user.is_authenticated:
+        if request.method=='POST':
+            type=request.POST.get('type')
+            txtFullName=request.POST['txtFullName']
+            cpname=request.POST['cpname']
+           
+            email=request.POST.get('myEmail')
+            wphone=request.POST.get('wphone')
+            mobile=request.POST.get('mobile')
+            skname=request.POST.get('skname')
+            desg=request.POST.get('desg')      
+            dept=request.POST.get('dept')
+            wbsite=request.POST.get('wbsite')
+
+            gstt=request.POST.get('gstt')
+            posply=request.POST.get('posply')
+            tax1=request.POST.get('tax1')
+            crncy=request.POST.get('crncy')
+            obal=request.POST.get('obal')
+
+          
+            pterms=request.POST.get('pterms')
+
+            plst=request.POST.get('plst')
+            plang=request.POST.get('plang')
+            fbk=request.POST.get('fbk')
+            twtr=request.POST.get('twtr')
+        
+            atn=request.POST.get('atn')
+            ctry=request.POST.get('ctry')
+            
+            addrs=request.POST.get('addrs')
+            addrs1=request.POST.get('addrs1')
+            bct=request.POST.get('bct')
+            bst=request.POST.get('bst')
+            bzip=request.POST.get('bzip')
+            bpon=request.POST.get('bpon')
+            bfx=request.POST.get('bfx')
+
+            sal=request.POST.get('sal')
+            ftname=request.POST.get('ftname')
+            ltname=request.POST.get('ltname')
+            mail=request.POST.get('mail')
+            bworkpn=request.POST.get('bworkpn')
+            bmobile=request.POST.get('bmobile')
+
+            bskype=request.POST.get('bskype')
+            bdesg=request.POST.get('bdesg')
+            bdept=request.POST.get('bdept')
+            u = User.objects.get(id = request.user.id)
+
+          
+            ctmr=customer(customerName=txtFullName,customerType=type,
+                        companyName=cpname,customerEmail=email,customerWorkPhone=wphone,
+                         customerMobile=mobile,skype=skname,designation=desg,department=dept,
+                           website=wbsite,GSTTreatment=gstt,placeofsupply=posply, Taxpreference=tax1,
+                             currency=crncy,OpeningBalance=obal,PaymentTerms=pterms,
+                                PriceList=plst,PortalLanguage=plang,Facebook=fbk,Twitter=twtr,
+                                 Attention=atn,country=ctry,Address1=addrs,Address2=addrs1,
+                                  city=bct,state=bst,zipcode=bzip,phone1=bpon,
+                                   fax=bfx,CPsalutation=sal,Firstname=ftname,
+                                    Lastname=ltname,CPemail=mail,CPphone=bworkpn,
+                                    CPmobile= bmobile,CPskype=bskype,CPdesignation=bdesg,
+                                     CPdepartment=bdept,user=u )
+            ctmr.save()  
+            
+            return redirect("create_sales_order")
+
+    
+@login_required(login_url='login')        
+def payment_term_for_sorder(request):
+    if request.method=='POST':
+        term=request.POST.get('term')
+        day=request.POST.get('day')
+        ptr=payment_terms(Terms=term,Days=day)
+        ptr.save()
+        return redirect("create_sales_order")
+        
+
+
+@login_required(login_url='login')
+def itemdata(request):
+    cur_user = request.user.id
+    user = User.objects.get(id=cur_user)
+    company = company_details.objects.get(user = user)
+    # print(company.state)
+    id = request.GET.get('id')
+    cust = request.GET.get('cust')
+    
+        
+    item = AddItem.objects.get(Name=id)
+    cus=customer.objects.get(customerName=cust)
+    rate = item.s_price
+    place=company.state
+    gst = item.intrastate
+    igst = item.interstate
+    desc=item.s_desc
+    print(place)
+    mail=cus.customerEmail
+    
+    place_of_supply = customer.objects.get(customerName=cust).placeofsupply
+    print(place_of_supply)
+    return JsonResponse({"status":" not",'mail':mail,'desc':desc,'place':place,'rate':rate,'pos':place_of_supply,'gst':gst,'igst':igst})
+    return redirect('/')
+            
+
+
+
+    
+@login_required(login_url='login')
+def add_sales_order(request):
+    if request.user.is_authenticated:
+        if request.method=='POST':
+            c=request.POST['cx_name']
+            cus=customer.objects.get(customerName=c)   
+            custo=cus.id
+            sales_no=request.POST['sale_no']
+            terms=request.POST['term']
+            term=payment_terms.objects.get(id=terms)
+            reference=request.POST['ord_no']
+            sa_date=request.POST['sa_date']
+            sh_date=request.POST['sh_date']
+            d_method=request.POST['d_meth']
+            s_pers=request.POST['s_pers']
+        
+            
+            cxnote=request.POST['customer_note']
+            subtotal=request.POST['subtotal']
+            igst=request.POST['igst']
+            cgst=request.POST['cgst']
+            sgst=request.POST['sgst']
+            totaltax=request.POST['totaltax']
+            t_total=request.POST['t_total']
+            if request.FILES.get('file') is not None:
+                file=request.FILES['file']
+            else:
+                file="/static/images/alt.jpg"
+            tc=request.POST['ter_cond']
+
+            status=request.POST['sd']
+            if status=='draft':
+                print(status)   
+            else:
+                print(status)  
+        
+            product=request.POST.getlist('item[]')
+            hsn=request.POST.getlist('hsn[]')
+            quantity=request.POST.getlist('quantity[]')
+            rate=request.POST.getlist('rate[]')
+            desc=request.POST.getlist('desc[]')
+            tax=request.POST.getlist('tax[]')
+            total=request.POST.getlist('amount[]')
+            term=payment_terms.objects.get(id=term.id)
+
+            sales=SalesOrder(customer_id=custo,sales_no=sales_no,terms=term,reference=reference, sales_date=sa_date,ship_date=sh_date,
+                        cxnote=cxnote,subtotal=subtotal,igst=igst,cgst=cgst,sgst=sgst,t_tax=totaltax,
+                        grandtotal=t_total,status=status,terms_condition=tc,file=file,d_method=d_method,s_person=s_pers)
+            sales.save()
+            sale_id=SalesOrder.objects.get(id=sales.id)
+            if len(product)==len(quantity)==len(tax)==len(total)==len(rate):
+
+                mapped = zip(product,quantity,tax,total,rate)
+                mapped = list(mapped)
+                for element in mapped:
+                    created =sales_item.objects.get_or_create(sale=sale_id,product=element[0],
+                                        quantity=element[1],tax=element[2],total=element[3],rate=element[4])
+                
+
+                    
+               
+   
+    return render(request,'create_sales_order.html')            
+    
+@login_required(login_url='login')
+def sales_order_det(request,id):
+    sales=SalesOrder.objects.get(id=id)
+    saleitem=sales_item.objects.filter(sale_id=id)
+    sale_order=SalesOrder.objects.all()
+    company=company_details.objects.get(user_id=request.user.id)
+    
+    
+    context={
+        'sale':sales,
+        'saleitem':saleitem,
+        'sale_order':sale_order,
+        'comp':company,
+        
+        
+                    }
+    return render(request,'sales_order_det.html',context)
+
+    
+@login_required(login_url='login')
+def delet_sales(request,id):
+    d=SalesOrder.objects.get(id=id)
+    d.delete()
+    return redirect('view_sales_order')
+    
+    
+@login_required(login_url='login')
+def edit_sales_order(request,id):
+    c = customer.objects.all()
+    itm = AddItem.objects.all()
+    salesitem = sales_item.objects.filter(sale_id=id)
+    sales = SalesOrder.objects.get(id=id)
+    pay=payment_terms.objects.all()
+
+
+    if request.method == 'POST':
+        u=request.user.id
+        c=request.POST['cx_name']
+        
+        cust=customer.objects.get(customerName=c) 
+        sales.customer=cust
+        term=request.POST['term']
+        
+        
+        sales.terms = payment_terms.objects.get(id=term)
+        sales.sales_date = request.POST['sa_date']
+        sales.shipdate=request.POST['sh_date']
+        sales.cxnote = request.POST['customer_note']
+        sales.igst = request.POST['igst']
+        sales.cgst = request.POST['cgst']
+        sales.sgst = request.POST['sgst']
+        sales.t_tax = request.POST['totaltax']
+        sales.grandtotal = request.POST['t_total']
+
+        if request.FILES.get('file') is not None:
+            sales.file = request.FILES['file']
+        else:
+            sales.file = "/static/images/alt.jpg"
+
+            sales.terms_condition = request.POST.get('ter_cond')
+        
+        status=request.POST['sd']
+        if status=='draft':
+            sales.status=status      
+        else:
+            sales.status=status   
+         
+        sales.save()
+        
+        product=request.POST.getlist('item[]')
+        quantity=request.POST.getlist('quantity[]')
+        rate=request.POST.getlist('rate[]')
+        tax=request.POST.getlist('tax[]')
+        total=request.POST.getlist('amount[]')
+        obj_dele=sales_item.objects.filter(sale_id=sales.id)
+        obj_dele.delete()
+       
+        if len(product)==len(quantity)==len(tax)==len(total)==len(rate):
+
+            mapped = zip(product,quantity,tax,total,rate)
+            mapped = list(mapped)
+            for element in mapped:
+                created = sales_item.objects.get_or_create(sale=sales,product=element[0],
+                                    quantity=element[1],tax=element[2],total=element[3],rate=element[4])
+                
+            return redirect('sales_order_det',id)
+    context={
+        "c":c,
+        "itm":itm,
+        "saleitm":salesitem,
+        "sale":sales,
+        "pay":pay
+
+    }
+    return render(request,'edit_sale_page.html',context)

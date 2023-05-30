@@ -28,20 +28,24 @@
                         <th>REFERENCE</th>
                         <th>CUSTOMER NAME</th>
                         <th>STATUS</th>
-                        <th>INVOICE</th>
+                        <th>INVOICED</th>
                         <th>PAYMENT</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {% for v in data %}
+                      {% for i in sale %}
              
                       <tr id="over">
+
+                        <td>{{i.sales_date}}</td>
              
-                       <!-- <td onclick="location.href ='{% url 'detail' v.id %}' " > {{v.Name}}</td> -->
-                        <td><a href="{% url 'view_vendor_details' v.id %}" style="color: rgb(230, 171, 45);">{{v.first_name}} {{v.last_name}}</a></td>
-                        <td>{{v.company_name}}</td>
-                        <td>{{v.vendor_email}}</td>
-                        <td>{{v.vendor_wphone}}</td>
+                       <!-- <td onclick="location.href ='' " > {{v.Name}}</td> -->
+                        <td><a href="{% url 'sales_order_det' i.id %}" style="color: rgb(230, 171, 45);">{{i.sales_no}}</a></td>
+                        <td>{{i.reference}}</td>
+                        <td>{{i.customer.customerName}}</td>
+                        <td>{{i.status}}</td>
+                        <td></td>
+                        <td></td>
         
                        
                       </tr>
